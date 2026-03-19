@@ -8,12 +8,15 @@
   <body>
     <h1>Suporte</h1>
 
-    <script
-      type="text/javascript"
-      id="hs-script-loader"
-      async
-      defer
-      src="https://js.hs-scripts.com/23569862.js">
+    <script type="text/javascript" id="hs-script-loader" async defer src="https://js.hs-scripts.com/23569862.js"></script>
+
+    <script>
+      window.hsConversationsOnReady = [
+        function () {
+          console.log("HubSpot conversations ready");
+          document.body.insertAdjacentHTML("beforeend", "<p>Chat pronto</p>");
+        }
+      ];
     </script>
   </body>
 </html>
