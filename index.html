@@ -3,20 +3,140 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Support Chat</title>
-  </head>
-  <body>
-    <h1>Suporte</h1>
+    <title>Support Chat Debug</title>
+    <link rel="icon" href="data:," />
 
-    <script type="text/javascript" id="hs-script-loader" async defer src="https://js.hs-scripts.com/23569862.js"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100%;
+        background: #ffffff;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        padding: 24px;
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+
+      #status {
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f7f7f7;
+        color: #333;
+        white-space: pre-line;
+      }
+
+      #logs {
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #111;
+        color: #0f0;
+        font-family: monospace;
+        font-size: 13px;
+        white-space: pre-line;
+        max-height: 400px;
+        overflow: auto;
+      }
+    </style>
 
     <script>
+      function updateStatus(text) {
+        const el = document.getElementById('status');
+        if (el) el.innerText = text;
+      }
+
+      function addLog(text) {
+        console.log(text);
+        const el = document.getElementById('logs');
+        if (el) {
+          el.innerText += text + '\n';
+        }
+      }
+
+      window.onerror = function(message, source, lineno, colno, error) {
+        addLog('window.onerror: ' + message);
+      };
+
+      addLog('HTML LOADED');
+      addLog('Current URL: ' + window.location.href);
+      addLog('UserAgent: ' + navigator.userAgent);
+
+      window.hsConversationsSettings = {
+        loadImmediately: true,
+      };
+
       window.hsConversationsOnReady = [
         function () {
-          console.log("HubSpot conversations ready");
-          document.body.insertAdjacentHTML("beforeend", "<p>Chat pronto</p>");
+          addLog('HubSpot conversations API ready');
+          updateStatus('HubSpot API pronta');
         }
       ];
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Suporte</h1>
+      <div id="status">Carregando chat...</div>
+      <div id="logs"></div>
+    </div>
+
+    <script>
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.id = 'hs-script-loader';
+      script.async = true;
+      script.defer = true;
+      script.src = 'https://js.hs-scripts.com/23569862.js';
+
+      script.onload = function () {
+        addLog('HubSpot script loaded');
+        updateStatus('Script carregado');
+
+        setTimeout(function () {
+          const hasHubSpot = !!window.HubSpotConversations;
+          const hasWidget = !!window.HubSpotConversations?.widget;
+          const hasOnReady = !!window.hsConversationsOnReady;
+
+          addLog('window.HubSpotConversations exists: ' + hasHubSpot);
+          addLog('window.HubSpotConversations.widget exists: ' + hasWidget);
+          addLog('window.hsConversationsOnReady exists: ' + hasOnReady);
+
+          try {
+            if (window.HubSpotConversations?.widget) {
+              addLog('Trying widget.status()...');
+              const status = window.HubSpotConversations.widget.status();
+              addLog('widget.status(): ' + JSON.stringify(status));
+            } else {
+              addLog('widget.status() skipped because widget is unavailable');
+            }
+          } catch (e) {
+            addLog('widget.status() error: ' + e);
+          }
+
+          updateStatus(
+            'Script carregado\n' +
+            'HubSpotConversations: ' + hasHubSpot + '\n' +
+            'Widget: ' + hasWidget
+          );
+        }, 3000);
+      };
+
+      script.onerror = function () {
+        addLog('HubSpot script failed');
+        updateStatus('Falha ao carregar script');
+      };
+
+      document.head.appendChild(script);
     </script>
   </body>
 </html>
